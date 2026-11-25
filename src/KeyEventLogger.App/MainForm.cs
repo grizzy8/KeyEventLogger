@@ -156,9 +156,9 @@ public partial class MainForm : Form
                 return; // auto-repeat of a key that is still held
             }
         }
-        else
+        else if (!_pressedKeys.Release(keyName))
         {
-            _pressedKeys.Release(keyName);
+            return; // key-up of a key whose key-down we never saw (e.g. pressed inside a dialog)
         }
 
         _session.Record(

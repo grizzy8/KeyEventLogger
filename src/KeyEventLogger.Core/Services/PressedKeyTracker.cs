@@ -17,10 +17,14 @@ public sealed class PressedKeyTracker
         return _pressed.Add(keyName);
     }
 
-    public void Release(string keyName)
+    /// <returns>
+    /// <c>true</c> if the key was held (its press was seen); <c>false</c> for a key-up whose
+    /// key-down never reached us, e.g. a key pressed in a dialog or another window.
+    /// </returns>
+    public bool Release(string keyName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(keyName);
-        _pressed.Remove(keyName);
+        return _pressed.Remove(keyName);
     }
 
     /// <summary>Forgets all held keys, e.g. when the window loses focus and key-up events may be missed.</summary>

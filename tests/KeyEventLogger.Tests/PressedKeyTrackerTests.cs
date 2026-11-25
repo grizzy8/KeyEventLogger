@@ -42,13 +42,32 @@ public class PressedKeyTrackerTests
     }
 
     [Fact]
-    public void Release_KeyThatWasNotPressed_DoesNotThrow()
+    public void Release_HeldKey_ReturnsTrue()
+    {
+        var tracker = new PressedKeyTracker();
+        tracker.TryPress("A");
+
+        Assert.True(tracker.Release("A"));
+        Assert.Equal(0, tracker.Count);
+    }
+
+    [Fact]
+    public void Release_KeyThatWasNotPressed_ReturnsFalse()
     {
         var tracker = new PressedKeyTracker();
 
+        Assert.False(tracker.Release("A"));
+        Assert.Equal(0, tracker.Count);
+    }
+
+    [Fact]
+    public void Release_SameKeyTwice_ReturnsFalseSecondTime()
+    {
+        var tracker = new PressedKeyTracker();
+        tracker.TryPress("A");
         tracker.Release("A");
 
-        Assert.Equal(0, tracker.Count);
+        Assert.False(tracker.Release("A"));
     }
 
     [Fact]
