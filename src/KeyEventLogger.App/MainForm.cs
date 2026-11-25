@@ -22,6 +22,9 @@ public partial class MainForm : Form
         // Reuse the icon embedded in the exe (ApplicationIcon) for the window and taskbar.
         Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? Icon;
         ScaleColumnWidths(lvEntries, lvTopKeys);
+        // The designer resumes layout without performing it, so the docked children of the
+        // statistics group stay unplaced until the first update; lay them out up front.
+        grpStats.PerformLayout();
         _session.EntryAdded += OnEntryAdded;
         _session.RecordingStateChanged += OnRecordingStateChanged;
         _session.Cleared += OnCleared;
