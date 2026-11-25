@@ -44,12 +44,20 @@ partial class MainForm
         colEvent = new ColumnHeader();
         colKey = new ColumnHeader();
         colModifiers = new ColumnHeader();
+        sidePanel = new Panel();
+        grpStats = new GroupBox();
+        lvTopKeys = new ListView();
+        colTopKey = new ColumnHeader();
+        colTopCount = new ColumnHeader();
+        lblTotalKeys = new Label();
         statusStrip = new StatusStrip();
         lblEntryCount = new ToolStripStatusLabel();
         lblMessage = new ToolStripStatusLabel();
         statusPanel.SuspendLayout();
         buttonPanel.SuspendLayout();
         inputPanel.SuspendLayout();
+        sidePanel.SuspendLayout();
+        grpStats.SuspendLayout();
         statusStrip.SuspendLayout();
         SuspendLayout();
         //
@@ -160,22 +168,74 @@ partial class MainForm
         // colTime
         //
         colTime.Text = "Zaman";
-        colTime.Width = 200;
+        colTime.Width = 185;
         //
         // colEvent
         //
         colEvent.Text = "Olay";
-        colEvent.Width = 100;
+        colEvent.Width = 85;
         //
         // colKey
         //
         colKey.Text = "Tuş";
-        colKey.Width = 160;
+        colKey.Width = 110;
         //
         // colModifiers
         //
         colModifiers.Text = "Değiştirici";
-        colModifiers.Width = 160;
+        colModifiers.Width = 100;
+        //
+        // sidePanel
+        //
+        sidePanel.Controls.Add(grpStats);
+        sidePanel.Dock = DockStyle.Right;
+        sidePanel.Name = "sidePanel";
+        sidePanel.Padding = new Padding(8, 8, 12, 8);
+        sidePanel.Size = new Size(250, 300);
+        sidePanel.TabIndex = 5;
+        //
+        // grpStats
+        //
+        grpStats.Controls.Add(lvTopKeys);
+        grpStats.Controls.Add(lblTotalKeys);
+        grpStats.Dock = DockStyle.Top;
+        grpStats.Name = "grpStats";
+        grpStats.Padding = new Padding(8, 4, 8, 8);
+        grpStats.Size = new Size(230, 230);
+        grpStats.TabIndex = 0;
+        grpStats.TabStop = false;
+        grpStats.Text = "İstatistik";
+        //
+        // lblTotalKeys
+        //
+        lblTotalKeys.AutoSize = false;
+        lblTotalKeys.Dock = DockStyle.Top;
+        lblTotalKeys.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        lblTotalKeys.Name = "lblTotalKeys";
+        lblTotalKeys.Size = new Size(214, 30);
+        lblTotalKeys.Text = "Toplam tuş: 0";
+        lblTotalKeys.TextAlign = ContentAlignment.MiddleLeft;
+        //
+        // lvTopKeys
+        //
+        lvTopKeys.Columns.AddRange(new ColumnHeader[] { colTopKey, colTopCount });
+        lvTopKeys.Dock = DockStyle.Fill;
+        lvTopKeys.FullRowSelect = true;
+        lvTopKeys.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+        lvTopKeys.Name = "lvTopKeys";
+        lvTopKeys.TabIndex = 1;
+        lvTopKeys.UseCompatibleStateImageBehavior = false;
+        lvTopKeys.View = View.Details;
+        //
+        // colTopKey
+        //
+        colTopKey.Text = "En sık 5 tuş";
+        colTopKey.Width = 130;
+        //
+        // colTopCount
+        //
+        colTopCount.Text = "Adet";
+        colTopCount.Width = 60;
         //
         // statusStrip
         //
@@ -199,6 +259,7 @@ partial class MainForm
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(820, 560);
         Controls.Add(lvEntries);
+        Controls.Add(sidePanel);
         Controls.Add(statusStrip);
         Controls.Add(inputPanel);
         Controls.Add(buttonPanel);
@@ -216,6 +277,8 @@ partial class MainForm
         buttonPanel.ResumeLayout(false);
         inputPanel.ResumeLayout(false);
         inputPanel.PerformLayout();
+        sidePanel.ResumeLayout(false);
+        grpStats.ResumeLayout(false);
         statusStrip.ResumeLayout(false);
         statusStrip.PerformLayout();
         ResumeLayout(false);
@@ -239,6 +302,12 @@ partial class MainForm
     private ColumnHeader colEvent;
     private ColumnHeader colKey;
     private ColumnHeader colModifiers;
+    private Panel sidePanel;
+    private GroupBox grpStats;
+    private Label lblTotalKeys;
+    private ListView lvTopKeys;
+    private ColumnHeader colTopKey;
+    private ColumnHeader colTopCount;
     private StatusStrip statusStrip;
     private ToolStripStatusLabel lblEntryCount;
     private ToolStripStatusLabel lblMessage;

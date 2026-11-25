@@ -7,6 +7,7 @@ public partial class MainForm : Form
 {
     private const int WmKeyDown = 0x0100;
     private const int WmSysKeyDown = 0x0104;
+    private const int TopKeysShown = 5;
 
     private static readonly Color RecordingColor = Color.FromArgb(200, 30, 30);
     private static readonly Color StoppedColor = Color.FromArgb(90, 90, 90);
@@ -18,10 +19,21 @@ public partial class MainForm : Form
     public MainForm()
     {
         InitializeComponent();
+        ScaleColumnWidths(lvEntries, lvTopKeys);
         _session.EntryAdded += OnEntryAdded;
         _session.RecordingStateChanged += OnRecordingStateChanged;
         _session.Cleared += OnCleared;
         UpdateRecordingUi();
+    }
+
+    // WinForms does not scale ListView column widths with the display DPI, so headers and
+    // timestamps would be cut off on high-DPI screens.
+    private void ScaleColumnWidths(params ListView[] lists)
+    {
+        foreach (var column in lists.SelectMany(list => list.Columns.Cast<ColumnHeader>()))
+        {
+            column.Width = LogicalToDeviceUnits(column.Width);
+        }
     }
 
     private void OnRecordingStateChanged(object? sender, EventArgs e)
@@ -73,7 +85,23 @@ public partial class MainForm : Form
     {
         lvEntries.Items.Clear();
         UpdateEntryCount();
+        RefreshStatistics();
         lblMessage.Text = "Kayıtlar temizlendi.";
+    }
+
+    private void RefreshStatistics()
+    {
+        lblTotalKeys.Text = $"Toplam tuş: {KeyStatistics.TotalKeyPresses(_session.Entries)}";
+
+        lvTopKeys.BeginUpdate();
+        lvTopKeys.Items.Clear();
+
+        foreach (var keyCount in KeyStatistics.TopKeys(_session.Entries, TopKeysShown))
+        {
+            lvTopKeys.Items.Add(new ListViewItem([keyCount.KeyName, keyCount.Count.ToString()]));
+        }
+
+        lvTopKeys.EndUpdate();
     }
 
     private void UpdateEntryCount() => lblEntryCount.Text = $"{_session.Entries.Count} kayıt";
@@ -177,5 +205,10 @@ public partial class MainForm : Form
         lvEntries.Items.Add(item);
         item.EnsureVisible();
         UpdateEntryCount();
+
+        if (entry.EventType == KeyEventType.KeyDown)
+        {
+            RefreshStatistics(); // only key presses change the statistics
+        }
     }
 }
