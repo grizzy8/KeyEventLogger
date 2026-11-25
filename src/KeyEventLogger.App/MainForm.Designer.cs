@@ -50,6 +50,14 @@ partial class MainForm
         colTopKey = new ColumnHeader();
         colTopCount = new ColumnHeader();
         lblTotalKeys = new Label();
+        grpFilter = new GroupBox();
+        lblFilterFrom = new Label();
+        dtpFrom = new DateTimePicker();
+        lblFilterTo = new Label();
+        dtpTo = new DateTimePicker();
+        filterButtonPanel = new FlowLayoutPanel();
+        btnApplyFilter = new Button();
+        btnResetFilter = new Button();
         statusStrip = new StatusStrip();
         lblEntryCount = new ToolStripStatusLabel();
         lblMessage = new ToolStripStatusLabel();
@@ -58,6 +66,8 @@ partial class MainForm
         inputPanel.SuspendLayout();
         sidePanel.SuspendLayout();
         grpStats.SuspendLayout();
+        grpFilter.SuspendLayout();
+        filterButtonPanel.SuspendLayout();
         statusStrip.SuspendLayout();
         SuspendLayout();
         //
@@ -187,6 +197,8 @@ partial class MainForm
         //
         // sidePanel
         //
+        sidePanel.AutoScroll = true;
+        sidePanel.Controls.Add(grpFilter);
         sidePanel.Controls.Add(grpStats);
         sidePanel.Dock = DockStyle.Right;
         sidePanel.Name = "sidePanel";
@@ -201,7 +213,7 @@ partial class MainForm
         grpStats.Dock = DockStyle.Top;
         grpStats.Name = "grpStats";
         grpStats.Padding = new Padding(8, 4, 8, 8);
-        grpStats.Size = new Size(230, 230);
+        grpStats.Size = new Size(230, 180);
         grpStats.TabIndex = 0;
         grpStats.TabStop = false;
         grpStats.Text = "İstatistik";
@@ -237,6 +249,89 @@ partial class MainForm
         colTopCount.Text = "Adet";
         colTopCount.Width = 60;
         //
+        // grpFilter
+        //
+        grpFilter.Controls.Add(filterButtonPanel);
+        grpFilter.Controls.Add(dtpTo);
+        grpFilter.Controls.Add(lblFilterTo);
+        grpFilter.Controls.Add(dtpFrom);
+        grpFilter.Controls.Add(lblFilterFrom);
+        grpFilter.Dock = DockStyle.Top;
+        grpFilter.Name = "grpFilter";
+        grpFilter.Padding = new Padding(8, 4, 8, 8);
+        grpFilter.Size = new Size(230, 185);
+        grpFilter.TabIndex = 1;
+        grpFilter.TabStop = false;
+        grpFilter.Text = "Tarih/saat filtresi";
+        //
+        // lblFilterFrom
+        //
+        lblFilterFrom.AutoSize = false;
+        lblFilterFrom.Dock = DockStyle.Top;
+        lblFilterFrom.Name = "lblFilterFrom";
+        lblFilterFrom.Size = new Size(214, 24);
+        lblFilterFrom.Text = "Başlangıç:";
+        lblFilterFrom.TextAlign = ContentAlignment.BottomLeft;
+        //
+        // dtpFrom
+        //
+        dtpFrom.CustomFormat = "yyyy-MM-dd HH:mm:ss";
+        dtpFrom.Dock = DockStyle.Top;
+        dtpFrom.Format = DateTimePickerFormat.Custom;
+        dtpFrom.Name = "dtpFrom";
+        dtpFrom.ShowCheckBox = true;
+        dtpFrom.Checked = false;
+        dtpFrom.TabIndex = 1;
+        dtpFrom.ValueChanged += dtpFrom_ValueChanged;
+        //
+        // lblFilterTo
+        //
+        lblFilterTo.AutoSize = false;
+        lblFilterTo.Dock = DockStyle.Top;
+        lblFilterTo.Name = "lblFilterTo";
+        lblFilterTo.Size = new Size(214, 24);
+        lblFilterTo.Text = "Bitiş:";
+        lblFilterTo.TextAlign = ContentAlignment.BottomLeft;
+        //
+        // dtpTo
+        //
+        dtpTo.CustomFormat = "yyyy-MM-dd HH:mm:ss";
+        dtpTo.Dock = DockStyle.Top;
+        dtpTo.Format = DateTimePickerFormat.Custom;
+        dtpTo.Name = "dtpTo";
+        dtpTo.ShowCheckBox = true;
+        dtpTo.Checked = false;
+        dtpTo.TabIndex = 3;
+        dtpTo.ValueChanged += dtpTo_ValueChanged;
+        //
+        // filterButtonPanel
+        //
+        filterButtonPanel.Controls.Add(btnApplyFilter);
+        filterButtonPanel.Controls.Add(btnResetFilter);
+        filterButtonPanel.Dock = DockStyle.Top;
+        filterButtonPanel.Name = "filterButtonPanel";
+        filterButtonPanel.Padding = new Padding(0, 8, 0, 0);
+        filterButtonPanel.Size = new Size(214, 48);
+        filterButtonPanel.TabIndex = 4;
+        //
+        // btnApplyFilter
+        //
+        btnApplyFilter.Name = "btnApplyFilter";
+        btnApplyFilter.Size = new Size(98, 32);
+        btnApplyFilter.TabIndex = 0;
+        btnApplyFilter.Text = "Uygula";
+        btnApplyFilter.UseVisualStyleBackColor = true;
+        btnApplyFilter.Click += btnApplyFilter_Click;
+        //
+        // btnResetFilter
+        //
+        btnResetFilter.Name = "btnResetFilter";
+        btnResetFilter.Size = new Size(98, 32);
+        btnResetFilter.TabIndex = 1;
+        btnResetFilter.Text = "Sıfırla";
+        btnResetFilter.UseVisualStyleBackColor = true;
+        btnResetFilter.Click += btnResetFilter_Click;
+        //
         // statusStrip
         //
         statusStrip.Items.AddRange(new ToolStripItem[] { lblEntryCount, lblMessage });
@@ -257,7 +352,7 @@ partial class MainForm
         //
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(820, 560);
+        ClientSize = new Size(860, 600);
         Controls.Add(lvEntries);
         Controls.Add(sidePanel);
         Controls.Add(statusStrip);
@@ -265,7 +360,7 @@ partial class MainForm
         Controls.Add(buttonPanel);
         Controls.Add(statusPanel);
         KeyPreview = true;
-        MinimumSize = new Size(640, 440);
+        MinimumSize = new Size(720, 560);
         Name = "MainForm";
         ShowInTaskbar = true;
         StartPosition = FormStartPosition.CenterScreen;
@@ -279,6 +374,8 @@ partial class MainForm
         inputPanel.PerformLayout();
         sidePanel.ResumeLayout(false);
         grpStats.ResumeLayout(false);
+        grpFilter.ResumeLayout(false);
+        filterButtonPanel.ResumeLayout(false);
         statusStrip.ResumeLayout(false);
         statusStrip.PerformLayout();
         ResumeLayout(false);
@@ -308,6 +405,14 @@ partial class MainForm
     private ListView lvTopKeys;
     private ColumnHeader colTopKey;
     private ColumnHeader colTopCount;
+    private GroupBox grpFilter;
+    private Label lblFilterFrom;
+    private DateTimePicker dtpFrom;
+    private Label lblFilterTo;
+    private DateTimePicker dtpTo;
+    private FlowLayoutPanel filterButtonPanel;
+    private Button btnApplyFilter;
+    private Button btnResetFilter;
     private StatusStrip statusStrip;
     private ToolStripStatusLabel lblEntryCount;
     private ToolStripStatusLabel lblMessage;

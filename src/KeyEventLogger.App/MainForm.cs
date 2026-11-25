@@ -67,9 +67,10 @@ public partial class MainForm : Form
             return;
         }
 
+        var scope = _range.IsActive ? "Filtre aktif olsa bile tüm " : string.Empty;
         var answer = MessageBox.Show(
             this,
-            $"{_session.Entries.Count} kayıt silinecek. Kaydetmediyseniz geri alınamaz.\n\nDevam edilsin mi?",
+            $"{scope}{_session.Entries.Count} kayıt silinecek. Kaydetmediyseniz geri alınamaz.\n\nDevam edilsin mi?",
             "Kayıtları temizle",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Warning,
@@ -83,20 +84,20 @@ public partial class MainForm : Form
 
     private void OnCleared(object? sender, EventArgs e)
     {
-        lvEntries.Items.Clear();
-        UpdateEntryCount();
-        RefreshStatistics();
+        RebuildEntryList();
         lblMessage.Text = "Kayıtlar temizlendi.";
     }
 
+    // The statistics describe what is visible, i.e. the entries that pass the active filter.
     private void RefreshStatistics()
     {
-        lblTotalKeys.Text = $"Toplam tuş: {KeyStatistics.TotalKeyPresses(_session.Entries)}";
+        grpStats.Text = _range.IsActive ? "İstatistik (filtreli)" : "İstatistik";
+        lblTotalKeys.Text = $"Toplam tuş: {KeyStatistics.TotalKeyPresses(_visibleEntries)}";
 
         lvTopKeys.BeginUpdate();
         lvTopKeys.Items.Clear();
 
-        foreach (var keyCount in KeyStatistics.TopKeys(_session.Entries, TopKeysShown))
+        foreach (var keyCount in KeyStatistics.TopKeys(_visibleEntries, TopKeysShown))
         {
             lvTopKeys.Items.Add(new ListViewItem([keyCount.KeyName, keyCount.Count.ToString()]));
         }
@@ -104,16 +105,21 @@ public partial class MainForm : Form
         lvTopKeys.EndUpdate();
     }
 
-    private void UpdateEntryCount() => lblEntryCount.Text = $"{_session.Entries.Count} kayıt";
+    private void UpdateEntryCount() => lblEntryCount.Text = _range.IsActive
+        ? $"{_visibleEntries.Count} / {_session.Entries.Count} kayıt (filtreli)"
+        : $"{_session.Entries.Count} kayıt";
 
     // Nothing is written unless the user presses "Kaydet" and picks a file themselves.
+    // With an active filter only the visible entries are saved.
     private void btnSave_Click(object? sender, EventArgs e)
     {
-        if (_session.Entries.Count == 0)
+        if (_visibleEntries.Count == 0)
         {
-            MessageBox.Show(
-                this, "Kaydedilecek kayıt yok. Önce kaydı başlatıp birkaç tuşa basın.",
-                "Kaydet", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var reason = _session.Entries.Count == 0
+                ? "Kaydedilecek kayıt yok. Önce kaydı başlatıp birkaç tuşa basın."
+                : "Filtreye uyan kayıt yok. Filtreyi değiştirin veya sıfırlayın.";
+
+            MessageBox.Show(this, reason, "Kaydet", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
 
@@ -140,8 +146,9 @@ public partial class MainForm : Form
     {
         try
         {
-            _logWriter.Write(path, _session.Entries);
-            lblMessage.Text = $"{_session.Entries.Count} kayıt şuraya kaydedildi: {path}";
+            _logWriter.Write(path, _visibleEntries);
+            var filtered = _range.IsActive ? " (filtreli)" : string.Empty;
+            lblMessage.Text = $"{_visibleEntries.Count} kayıt{filtered} şuraya kaydedildi: {path}";
         }
         catch (LogWriteException ex)
         {
@@ -199,9 +206,15 @@ public partial class MainForm : Form
 
     private void OnEntryAdded(object? sender, KeyLogEntry entry)
     {
-        var item = new ListViewItem(
-            [entry.TimestampText, entry.EventType.ToString(), entry.KeyName, entry.Modifiers]);
+        if (!_range.Contains(entry.Timestamp))
+        {
+            UpdateEntryCount(); // recorded, but hidden by the active filter
+            return;
+        }
 
+        _visibleEntries.Add(entry);
+
+        var item = CreateRow(entry);
         lvEntries.Items.Add(item);
         item.EnsureVisible();
         UpdateEntryCount();
@@ -211,4 +224,7 @@ public partial class MainForm : Form
             RefreshStatistics(); // only key presses change the statistics
         }
     }
+
+    private static ListViewItem CreateRow(KeyLogEntry entry) =>
+        new([entry.TimestampText, entry.EventType.ToString(), entry.KeyName, entry.Modifiers]);
 }
