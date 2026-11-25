@@ -8,6 +8,9 @@ public partial class MainForm : Form
     private const int WmKeyDown = 0x0100;
     private const int WmSysKeyDown = 0x0104;
 
+    private static readonly Color RecordingColor = Color.FromArgb(200, 30, 30);
+    private static readonly Color StoppedColor = Color.FromArgb(90, 90, 90);
+
     private readonly KeyLogSession _session = new();
     private readonly PressedKeyTracker _pressedKeys = new();
 
@@ -15,6 +18,27 @@ public partial class MainForm : Form
     {
         InitializeComponent();
         _session.EntryAdded += OnEntryAdded;
+        _session.RecordingStateChanged += OnRecordingStateChanged;
+        UpdateRecordingUi();
+    }
+
+    private void OnRecordingStateChanged(object? sender, EventArgs e)
+    {
+        UpdateRecordingUi();
+        lblMessage.Text = _session.IsRecording
+            ? "Kayıt başladı. Yalnızca bu pencere odaktayken basılan tuşlar kaydedilir."
+            : "Kayıt durduruldu.";
+    }
+
+    // The banner changes both colour and text so the state is clear without relying on colour alone.
+    private void UpdateRecordingUi()
+    {
+        var isRecording = _session.IsRecording;
+
+        statusPanel.BackColor = isRecording ? RecordingColor : StoppedColor;
+        lblRecordingStatus.Text = isRecording ? "●  KAYIT AKTİF" : "■  KAYIT DURDURULDU";
+        btnStart.Enabled = !isRecording;
+        btnStop.Enabled = isRecording;
     }
 
     private void btnStart_Click(object? sender, EventArgs e) => _session.Start();
