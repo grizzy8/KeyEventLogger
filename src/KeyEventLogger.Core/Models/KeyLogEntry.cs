@@ -36,6 +36,9 @@ public sealed record KeyLogEntry
     /// <summary>Held modifier keys such as "Ctrl+Shift"; empty when none.</summary>
     public string Modifiers { get; }
 
+    /// <summary>The timestamp as text, e.g. "2026-11-25 14:03:12.345" (invariant culture).</summary>
+    public string TimestampText => Timestamp.ToString(TimestampFormat, CultureInfo.InvariantCulture);
+
     /// <summary>Formats the entry as a single text line, e.g. "2026-11-25 14:03:12.345 | KeyDown | A | Shift".</summary>
     public string ToLogLine()
     {
@@ -43,7 +46,7 @@ public sealed record KeyLogEntry
 
         return string.Join(
             FieldSeparator,
-            Timestamp.ToString(TimestampFormat, CultureInfo.InvariantCulture),
+            TimestampText,
             EventType,
             KeyName,
             modifiers);

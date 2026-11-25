@@ -1,9 +1,80 @@
+using KeyEventLogger.Core.Models;
+using KeyEventLogger.Core.Services;
+
 namespace KeyEventLogger.App;
 
 public partial class MainForm : Form
 {
+    private const int WmKeyDown = 0x0100;
+    private const int WmSysKeyDown = 0x0104;
+
+    private readonly KeyLogSession _session = new();
+    private readonly PressedKeyTracker _pressedKeys = new();
+
     public MainForm()
     {
         InitializeComponent();
+        _session.EntryAdded += OnEntryAdded;
+    }
+
+    private void btnStart_Click(object? sender, EventArgs e) => _session.Start();
+
+    private void btnStop_Click(object? sender, EventArgs e) => _session.Stop();
+
+    // Only this form's own KeyDown/KeyUp events are used (KeyPreview = true);
+    // there is no global hook, so nothing is seen while another window has focus.
+    private void MainForm_KeyDown(object? sender, KeyEventArgs e) => HandleKeyEvent(KeyEventType.KeyDown, e);
+
+    private void MainForm_KeyUp(object? sender, KeyEventArgs e) => HandleKeyEvent(KeyEventType.KeyUp, e);
+
+    // WinForms does not raise KeyDown on the form for dialog keys (Tab, Enter on a button,
+    // arrows, Esc), although their KeyUp does arrive. ProcessCmdKey sees every key-down of
+    // this window before dialog handling, so route it through the same handler; the
+    // PressedKeyTracker drops the duplicate when KeyDown fires as well.
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+        if (msg.Msg is WmKeyDown or WmSysKeyDown)
+        {
+            HandleKeyEvent(KeyEventType.KeyDown, new KeyEventArgs(keyData));
+        }
+
+        return base.ProcessCmdKey(ref msg, keyData);
+    }
+
+    // While another window is active our KeyUp events are not delivered, so forget held keys.
+    private void MainForm_Deactivate(object? sender, EventArgs e) => _pressedKeys.Reset();
+
+    private void HandleKeyEvent(KeyEventType eventType, KeyEventArgs e)
+    {
+        var keyName = KeyMapper.GetKeyName(e.KeyCode);
+
+        if (eventType == KeyEventType.KeyDown)
+        {
+            if (!_pressedKeys.TryPress(keyName))
+            {
+                return; // auto-repeat of a key that is still held
+            }
+        }
+        else
+        {
+            _pressedKeys.Release(keyName);
+        }
+
+        _session.Record(
+            eventType,
+            keyName,
+            KeyMapper.GetModifiers(e),
+            isFormActive: ReferenceEquals(ActiveForm, this),
+            isSensitiveInput: KeyInputGuard.IsSensitiveInput(ActiveControl));
+    }
+
+    private void OnEntryAdded(object? sender, KeyLogEntry entry)
+    {
+        var item = new ListViewItem(
+            [entry.TimestampText, entry.EventType.ToString(), entry.KeyName, entry.Modifiers]);
+
+        lvEntries.Items.Add(item);
+        item.EnsureVisible();
+        lblEntryCount.Text = $"{_session.Entries.Count} kayıt";
     }
 }

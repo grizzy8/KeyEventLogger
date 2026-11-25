@@ -90,6 +90,7 @@ partial class MainForm
         btnStart.TabIndex = 0;
         btnStart.Text = "Başlat";
         btnStart.UseVisualStyleBackColor = true;
+        btnStart.Click += btnStart_Click;
         //
         // btnStop
         //
@@ -99,6 +100,7 @@ partial class MainForm
         btnStop.TabIndex = 1;
         btnStop.Text = "Durdur";
         btnStop.UseVisualStyleBackColor = true;
+        btnStop.Click += btnStop_Click;
         //
         // btnClear
         //
@@ -199,11 +201,15 @@ partial class MainForm
         Controls.Add(inputPanel);
         Controls.Add(buttonPanel);
         Controls.Add(statusPanel);
+        KeyPreview = true;
         MinimumSize = new Size(640, 440);
         Name = "MainForm";
         ShowInTaskbar = true;
         StartPosition = FormStartPosition.CenterScreen;
         Text = "Key Event Logger (Eğitsel)";
+        Deactivate += MainForm_Deactivate;
+        KeyDown += MainForm_KeyDown;
+        KeyUp += MainForm_KeyUp;
         statusPanel.ResumeLayout(false);
         buttonPanel.ResumeLayout(false);
         inputPanel.ResumeLayout(false);
