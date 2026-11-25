@@ -117,6 +117,7 @@ partial class MainForm
         btnSave.TabIndex = 3;
         btnSave.Text = "Kaydet...";
         btnSave.UseVisualStyleBackColor = true;
+        btnSave.Click += btnSave_Click;
         //
         // inputPanel
         //

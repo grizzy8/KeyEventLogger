@@ -13,6 +13,7 @@ public partial class MainForm : Form
 
     private readonly KeyLogSession _session = new();
     private readonly PressedKeyTracker _pressedKeys = new();
+    private readonly ILogWriter _logWriter = new TextFileLogWriter();
 
     public MainForm()
     {
@@ -44,6 +45,50 @@ public partial class MainForm : Form
     private void btnStart_Click(object? sender, EventArgs e) => _session.Start();
 
     private void btnStop_Click(object? sender, EventArgs e) => _session.Stop();
+
+    // Nothing is written unless the user presses "Kaydet" and picks a file themselves.
+    private void btnSave_Click(object? sender, EventArgs e)
+    {
+        if (_session.Entries.Count == 0)
+        {
+            MessageBox.Show(
+                this, "Kaydedilecek kayıt yok. Önce kaydı başlatıp birkaç tuşa basın.",
+                "Kaydet", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        using var dialog = new SaveFileDialog
+        {
+            Title = "Kayıtları metin dosyasına kaydet",
+            Filter = "Metin dosyası (*.txt)|*.txt",
+            DefaultExt = "txt",
+            AddExtension = true,
+            OverwritePrompt = true,
+            FileName = $"keylog_{DateTime.Now:yyyyMMdd_HHmmss}.txt"
+        };
+
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+        {
+            lblMessage.Text = "Kaydetme iptal edildi.";
+            return;
+        }
+
+        SaveEntries(dialog.FileName);
+    }
+
+    private void SaveEntries(string path)
+    {
+        try
+        {
+            _logWriter.Write(path, _session.Entries);
+            lblMessage.Text = $"{_session.Entries.Count} kayıt şuraya kaydedildi: {path}";
+        }
+        catch (LogWriteException ex)
+        {
+            lblMessage.Text = "Kaydetme başarısız.";
+            MessageBox.Show(this, ex.Message, "Kaydetme hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
 
     // Only this form's own KeyDown/KeyUp events are used (KeyPreview = true);
     // there is no global hook, so nothing is seen while another window has focus.
