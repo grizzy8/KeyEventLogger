@@ -94,7 +94,7 @@ KeyEventLogger.sln
 │   │   └── Services/             KeyLogSession, CapturePolicy, PressedKeyTracker,
 │   │                             KeyStatistics, LogFilter, ILogWriter, TextFileLogWriter
 │   └── KeyEventLogger.App/       Windows Forms arayüzü (net10.0-windows)
-│       └── MainForm*, KeyMapper, KeyInputGuard
+│       └── MainForm*, KeyMapper, KeyInputGuard, app.ico (uygulama ikonu)
 └── tests/
     └── KeyEventLogger.Tests/     xUnit birim testleri
 ```
