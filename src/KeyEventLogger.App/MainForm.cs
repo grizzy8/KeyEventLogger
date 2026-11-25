@@ -20,6 +20,7 @@ public partial class MainForm : Form
         InitializeComponent();
         _session.EntryAdded += OnEntryAdded;
         _session.RecordingStateChanged += OnRecordingStateChanged;
+        _session.Cleared += OnCleared;
         UpdateRecordingUi();
     }
 
@@ -45,6 +46,37 @@ public partial class MainForm : Form
     private void btnStart_Click(object? sender, EventArgs e) => _session.Start();
 
     private void btnStop_Click(object? sender, EventArgs e) => _session.Stop();
+
+    private void btnClear_Click(object? sender, EventArgs e)
+    {
+        if (_session.Entries.Count == 0)
+        {
+            lblMessage.Text = "Temizlenecek kayıt yok.";
+            return;
+        }
+
+        var answer = MessageBox.Show(
+            this,
+            $"{_session.Entries.Count} kayıt silinecek. Kaydetmediyseniz geri alınamaz.\n\nDevam edilsin mi?",
+            "Kayıtları temizle",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2);
+
+        if (answer == DialogResult.Yes)
+        {
+            _session.Clear();
+        }
+    }
+
+    private void OnCleared(object? sender, EventArgs e)
+    {
+        lvEntries.Items.Clear();
+        UpdateEntryCount();
+        lblMessage.Text = "Kayıtlar temizlendi.";
+    }
+
+    private void UpdateEntryCount() => lblEntryCount.Text = $"{_session.Entries.Count} kayıt";
 
     // Nothing is written unless the user presses "Kaydet" and picks a file themselves.
     private void btnSave_Click(object? sender, EventArgs e)
@@ -144,6 +176,6 @@ public partial class MainForm : Form
 
         lvEntries.Items.Add(item);
         item.EnsureVisible();
-        lblEntryCount.Text = $"{_session.Entries.Count} kayıt";
+        UpdateEntryCount();
     }
 }

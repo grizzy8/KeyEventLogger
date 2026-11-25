@@ -109,6 +109,7 @@ partial class MainForm
         btnClear.TabIndex = 2;
         btnClear.Text = "Temizle";
         btnClear.UseVisualStyleBackColor = true;
+        btnClear.Click += btnClear_Click;
         //
         // btnSave
         //
