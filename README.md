@@ -68,7 +68,7 @@ NuGet paketleri (yalnızca test projesinde):
 **Gereksinimler:** Windows 10/11 ve [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
 ```powershell
-git clone https://github.com/Grizzy8/KeyEventLogger.git
+git clone https://github.com/grizzy8/KeyEventLogger.git
 cd KeyEventLogger
 
 # Uygulamayı çalıştır
