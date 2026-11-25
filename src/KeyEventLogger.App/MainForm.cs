@@ -19,6 +19,8 @@ public partial class MainForm : Form
     public MainForm()
     {
         InitializeComponent();
+        // Reuse the icon embedded in the exe (ApplicationIcon) for the window and taskbar.
+        Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? Icon;
         ScaleColumnWidths(lvEntries, lvTopKeys);
         _session.EntryAdded += OnEntryAdded;
         _session.RecordingStateChanged += OnRecordingStateChanged;
